@@ -8,7 +8,13 @@ import time
 import sys
 import lamportclock
 
-SIZE_MSGS = 100
+
+# Abrindo arquivo
+with open('config.json') as configfile:
+    configdata = json.load(configfile)
+
+SIZE_MSGS = configdata["requests"]
+MODE = configdata["mode"]
 NUMBER_SERVERS = 5
 threads = []
 
@@ -93,23 +99,25 @@ class Client:
         print(msg)
 
     def initMessages(self):
-        for i in range(10000):
-            start_new_thread(self.callEvent, ())
-
-        # while True:
-        #     message = input('Digite 1 para criar um evento: ')
-        #     message = int(message)
-        #     if (message == 1):
-        #         start_new_thread(self.callEvent, ())
-        #     else:
-        #         print('Entrada inválida')
+        if MODE == "input":
+            while True:
+                message = input('Digite 1 para criar um evento: ')
+                message = int(message)
+                if (message == 1):
+                    start_new_thread(self.callEvent, ())
+                else:
+                    print('Entrada inválida')
+        else:
+            for i in range(SIZE_MSGS):
+                time.sleep(delay)
+                start_new_thread(self.callEvent, ())
 
     def callEvent(self):
 
         systemName = "S" + str(self.processID)
         lamporttime = float(self.clock.getLamportTime())
         self.addtoRequestQueue(self.reqQueue, lamporttime, systemName)
-        self.printRequestQ(self.reqQueue)
+        # self.printRequestQ(self.reqQueue)
         time.sleep(delay)
         addMessage = "Add na fila: " + \
             str(self.port) + " " + str(lamporttime)
@@ -134,13 +142,13 @@ class Client:
         tosend = "Contador atual de eventos: " + str(events.numofAccess)
         print(tosend)
         self.sendToAll(tosend)
+        self.removefromRequestQ(self.reqQueue)
+        self.replyList.clear()
         time.sleep(delay)
         releaseMessage = "Mensagem de release de recurso da porta" + \
             str(self.port)
         self.sendToAll(releaseMessage)
         print("Hora atual no relogio de lamport: " + self.clock.getLamportTime())
-        self.removefromRequestQ(self.reqQueue)
-        self.replyList.clear()
         self.lock.release()
 
     def startListening(self):
@@ -208,10 +216,6 @@ class Client:
     def closeSocket(self):
         self.socket.close()
 
-
-# Abrindo arquivo
-with open('config.json') as configfile:
-    configdata = json.load(configfile)
 
 time.sleep(10)
 events = events.Event(0)
