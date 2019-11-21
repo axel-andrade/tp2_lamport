@@ -93,17 +93,16 @@ class Client:
         print(msg)
 
     def initMessages(self):
-        # for i in range(10):
-        #     time.sleep(delay)
-        #     start_new_thread(self.callEvent, ())
+        for i in range(10000):
+            start_new_thread(self.callEvent, ())
 
-        while True:
-            message = input('Digite 1 para criar um evento: ')
-            message = int(message)
-            if (message == 1):
-                start_new_thread(self.callEvent, ())
-            else:
-                print('Entrada inválida')
+        # while True:
+        #     message = input('Digite 1 para criar um evento: ')
+        #     message = int(message)
+        #     if (message == 1):
+        #         start_new_thread(self.callEvent, ())
+        #     else:
+        #         print('Entrada inválida')
 
     def callEvent(self):
 
@@ -195,11 +194,12 @@ class Client:
         return heappop(queue)
 
     def printRequestQ(self, queue):
-        print("A fila de requests atual é:  ")
+        # print("A fila de requests atual é:  ")
         # nsmallest(n,fila) retorna as n linhas ordenadas por coluna em ordem crescente
         sorted = nsmallest(len(queue), queue)
         for i in sorted:
-            print(i)
+            item = str(i[0]).split(".")
+            print("("+item[0]+","+i[1]+")")
 
     def printReplyList(self, rlist):
         for i in rlist:
